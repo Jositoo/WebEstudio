@@ -1,249 +1,321 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-theme="modern">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Temporizador de Estudio Pro</title>
+    <title>Study Dashboard Pro</title>
     <style>
+        /* === SISTEMA DE TEMAS (Variables CSS) === */
         :root {
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --card-bg-light: #334155;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
+            /* Tema Moderno (Por defecto) */
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --surface-alt: #334155;
+            --text: #f8fafc;
+            --text-dim: #94a3b8;
             --primary: #3b82f6;
-            --primary-hover: #2563eb;
             --danger: #ef4444;
-            --danger-hover: #dc2626;
             --success: #10b981;
-            --font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            --font: system-ui, -apple-system, sans-serif;
+            --radius: 20px;
+            --border: 1px solid transparent;
+            --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+            --btn-radius: 12px;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
+        [data-theme="minimalist"] {
+            --bg: #f9fafb;
+            --surface: #ffffff;
+            --surface-alt: #e5e7eb;
+            --text: #111827;
+            --text-dim: #6b7280;
+            --primary: #111827;
+            --danger: #000000;
+            --success: #111827;
+            --font: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            --radius: 0px;
+            --border: 2px solid #111827;
+            --shadow: none;
+            --btn-radius: 0px;
         }
 
+        [data-theme="retro"] {
+            --bg: #000000;
+            --surface: #000000;
+            --surface-alt: #002200;
+            --text: #00ff00;
+            --text-dim: #008800;
+            --primary: #00ff00;
+            --danger: #ff0000;
+            --success: #00ff00;
+            --font: "Courier New", Courier, monospace;
+            --radius: 0px;
+            --border: 1px solid #00ff00;
+            --shadow: 0 0 15px rgba(0, 255, 0, 0.2);
+            --btn-radius: 0px;
+        }
+
+        [data-theme="lofi"] {
+            --bg: #fdf6e3;
+            --surface: #fffbf0;
+            --surface-alt: #eee8d5;
+            --text: #586e75;
+            --text-dim: #93a1a1;
+            --primary: #d33682;
+            --danger: #dc322f;
+            --success: #859900;
+            --font: "Georgia", serif;
+            --radius: 30px;
+            --border: 2px solid #eee8d5;
+            --shadow: 6px 6px 0px #eee8d5;
+            --btn-radius: 20px;
+        }
+
+        [data-theme="cyberpunk"] {
+            --bg: #fce300;
+            --surface: #000000;
+            --surface-alt: #111111;
+            --text: #00ffcc;
+            --text-dim: #ff003c;
+            --primary: #ff003c;
+            --danger: #ff003c;
+            --success: #00ffcc;
+            --font: "Impact", "Arial Black", sans-serif;
+            --radius: 0px;
+            --border: 2px solid #00ffcc;
+            --shadow: 8px 8px 0px #ff003c;
+            --btn-radius: 0px;
+        }
+
+        /* === ESTILOS GLOBALES === */
+        * { box-sizing: border-box; margin: 0; padding: 0; transition: background-color 0.3s, color 0.3s; }
+        
         body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            font-family: var(--font-family);
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: var(--font);
+            padding: 2rem 1rem;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 2rem 1rem;
-            min-height: 100vh;
         }
 
-        .timer-container, .settings-container {
-            background-color: var(--card-bg);
-            padding: 2.5rem;
-            border-radius: 24px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
-            text-align: center;
+        /* Header / Theme Switcher */
+        .top-bar {
             width: 100%;
-            max-width: 480px;
+            max-width: 1000px;
+            display: flex;
+            justify-content: flex-end;
             margin-bottom: 1.5rem;
         }
 
-        /* Modos */
-        .modes {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 0.5rem;
-            margin-bottom: 2rem;
-            background: rgba(0,0,0,0.2);
-            padding: 0.5rem;
-            border-radius: 12px;
-        }
-
-        .mode-btn {
-            background: transparent;
-            color: var(--text-muted);
-            border: none;
-            padding: 0.75rem 1rem;
-            font-size: 0.9rem;
-            font-weight: 600;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            flex: 1;
-            min-width: 80px;
-        }
-
-        .mode-btn:hover { color: var(--text-main); background: rgba(255,255,255,0.05); }
-        .mode-btn.active { background-color: var(--primary); color: white; }
-
-        /* Pantalla de tiempo */
-        .time-display {
-            font-size: 6rem;
-            font-weight: 700;
-            letter-spacing: -2px;
-            margin-bottom: 2rem;
-            font-variant-numeric: tabular-nums;
-            line-height: 1;
-        }
-
-        /* Controles Principales */
-        .controls { display: flex; justify-content: center; gap: 1rem; }
-        .btn {
-            padding: 1rem 2rem; font-size: 1.1rem; font-weight: 600;
-            border: none; border-radius: 12px; cursor: pointer;
-            transition: transform 0.1s ease, background-color 0.2s ease;
-            width: 140px;
-        }
-        .btn:active { transform: translateY(2px); }
-        .btn-main { background-color: var(--success); color: white; }
-        .btn-main:hover { background-color: #059669; }
-        .btn-main.pause { background-color: var(--danger); }
-        .btn-main.pause:hover { background-color: var(--danger-hover); }
-        .btn-reset { background-color: rgba(255,255,255,0.1); color: var(--text-main); }
-        .btn-reset:hover { background-color: rgba(255,255,255,0.15); }
-
-        /* Sección de Ajustes (Personalizado y YouTube) */
-        .settings-container {
-            padding: 1.5rem 2rem;
-            text-align: left;
-        }
-        
-        .settings-title {
-            font-size: 1.1rem;
-            color: var(--text-muted);
-            margin-bottom: 1rem;
-            border-bottom: 1px solid var(--card-bg-light);
-            padding-bottom: 0.5rem;
-        }
-
-        .input-group {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 1rem;
-            align-items: center;
-        }
-
-        .input-group label {
-            font-size: 0.9rem;
-            width: 120px;
-            color: var(--text-muted);
-        }
-
-        input[type="number"], input[type="text"] {
-            flex: 1;
-            padding: 0.75rem;
-            border-radius: 8px;
-            border: 1px solid var(--card-bg-light);
-            background-color: rgba(0,0,0,0.2);
-            color: white;
-            font-family: var(--font-family);
+        select {
+            background-color: var(--surface);
+            color: var(--text);
+            border: var(--border);
+            padding: 0.5rem 1rem;
+            font-family: var(--font);
+            border-radius: var(--btn-radius);
             outline: none;
-        }
-        
-        input:focus { border-color: var(--primary); }
-        
-        .btn-small {
-            background-color: var(--card-bg-light);
-            color: white;
-            border: none;
-            padding: 0.75rem 1rem;
-            border-radius: 8px;
             cursor: pointer;
-            font-weight: 600;
-            transition: 0.2s;
+            font-weight: bold;
         }
-        .btn-small:hover { background-color: var(--primary); }
+
+        /* Layout Principal */
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard { grid-template-columns: 1fr; }
+        }
+
+        .panel {
+            background-color: var(--surface);
+            padding: 2rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: var(--border);
+        }
+
+        .panel-title {
+            font-size: 1.2rem;
+            color: var(--text-dim);
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--surface-alt);
+            padding-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* === TEMPORIZADOR === */
+        .modes { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem; }
+        .mode-btn {
+            background: var(--surface-alt); color: var(--text-dim);
+            border: var(--border); padding: 0.5rem 1rem; font-family: var(--font);
+            border-radius: var(--btn-radius); cursor: pointer; flex: 1; font-weight: bold;
+        }
+        .mode-btn:hover { color: var(--text); }
+        .mode-btn.active { background-color: var(--primary); color: var(--bg); border-color: var(--primary); }
+        [data-theme="modern"] .mode-btn.active { color: white; }
+
+        .time-display {
+            font-size: 5rem; font-weight: bold; text-align: center;
+            margin: 1.5rem 0; font-variant-numeric: tabular-nums; line-height: 1;
+        }
+
+        .controls { display: flex; justify-content: center; gap: 1rem; margin-bottom: 2rem; }
+        .btn {
+            padding: 0.8rem 2rem; font-size: 1.1rem; font-weight: bold; font-family: var(--font);
+            border: var(--border); border-radius: var(--btn-radius); cursor: pointer;
+        }
+        .btn-main { background-color: var(--success); color: var(--bg); border-color: var(--success); }
+        .btn-main.pause { background-color: var(--danger); border-color: var(--danger); }
+        .btn-reset { background-color: var(--surface-alt); color: var(--text); }
+        [data-theme="modern"] .btn-main { color: white; }
+
+        /* Ajustes de Tiempo y YouTube */
+        .input-row { display: flex; gap: 0.5rem; margin-bottom: 1rem; align-items: center; }
+        .input-row input {
+            background: var(--surface-alt); color: var(--text); border: var(--border);
+            padding: 0.6rem; border-radius: var(--btn-radius); width: 100%; font-family: var(--font); outline: none;
+        }
+        .input-row input:focus { border-color: var(--primary); }
+        .input-row label { font-size: 0.9rem; color: var(--text-dim); min-width: 60px;}
+        
+        /* === ORGANIZADOR DE TAREAS === */
+        .todo-input-container { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
+        .todo-input-container input {
+            flex: 1; background: var(--surface-alt); color: var(--text); border: var(--border);
+            padding: 0.8rem; border-radius: var(--btn-radius); font-family: var(--font); outline: none;
+        }
+        .btn-add {
+            background-color: var(--primary); color: var(--bg); border: var(--border);
+            padding: 0 1.5rem; border-radius: var(--btn-radius); cursor: pointer; font-weight: bold;
+        }
+        [data-theme="modern"] .btn-add { color: white; }
+
+        .task-list { list-style: none; max-height: 350px; overflow-y: auto; }
+        .task-item {
+            display: flex; justify-content: space-between; align-items: center;
+            background: var(--surface-alt); padding: 0.8rem 1rem; margin-bottom: 0.5rem;
+            border-radius: var(--btn-radius); border: var(--border);
+        }
+        .task-text { flex: 1; cursor: pointer; }
+        .task-item.done .task-text { text-decoration: line-through; color: var(--text-dim); opacity: 0.6; }
+        
+        .task-actions button {
+            background: none; border: none; font-size: 1.2rem; cursor: pointer; margin-left: 0.5rem;
+        }
+        .btn-check { color: var(--success); }
+        .btn-delete { color: var(--danger); }
 
         /* Modal YouTube */
         #yt-modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; flex-direction: column;
         }
-
         #yt-modal.active { display: flex; }
-        
+        iframe { width: 90%; max-width: 800px; height: 450px; border: none; border-radius: 12px; }
         .close-modal {
-            background: var(--danger); color: white;
-            border: none; padding: 0.5rem 2rem; border-radius: 8px;
-            margin-top: 1rem; cursor: pointer; font-weight: bold; font-size: 1.1rem;
+            background: var(--danger); color: white; border: none; padding: 0.8rem 2rem;
+            border-radius: 8px; margin-top: 1.5rem; cursor: pointer; font-weight: bold; font-size: 1.1rem;
         }
-
-        iframe {
-            width: 80%;
-            max-width: 800px;
-            height: 450px;
-            border: none;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-        }
-
-        .hint { font-size: 0.8rem; color: #64748b; margin-top: -0.5rem; margin-bottom: 1rem; margin-left: 135px;}
-
     </style>
 </head>
 <body>
 
-    <!-- Temporizador Principal -->
-    <div class="timer-container">
-        <div class="modes">
-            <button class="mode-btn active" data-time="25">Pomodoro</button>
-            <button class="mode-btn" data-time="5">Descanso</button>
-            <button class="mode-btn" data-time="15">Largo</button>
-            <button class="mode-btn" id="custom-mode-btn">Manual</button>
+    <div class="top-bar">
+        <select id="theme-selector">
+            <option value="modern">Tema: Moderno</option>
+            <option value="minimalist">Tema: Minimalista</option>
+            <option value="retro">Tema: Retro Terminal</option>
+            <option value="lofi">Tema: Lo-Fi Chill</option>
+            <option value="cyberpunk">Tema: Cyberpunk</option>
+        </select>
+    </div>
+
+    <div class="dashboard">
+        <!-- PANEL IZQUIERDO: Temporizador -->
+        <div class="panel">
+            <div class="modes">
+                <button class="mode-btn active" data-sec="1500">Pomodoro</button>
+                <button class="mode-btn" data-sec="300">Descanso</button>
+                <button class="mode-btn" data-sec="900">Largo</button>
+                <button class="mode-btn" id="custom-mode-btn">Manual</button>
+            </div>
+
+            <div class="time-display" id="time">25:00</div>
+
+            <div class="controls">
+                <button class="btn btn-main" id="start-btn">INICIAR</button>
+                <button class="btn btn-reset" id="reset-btn">RESET</button>
+            </div>
+
+            <div class="panel-title">Tiempo Personalizado</div>
+            <div class="input-row">
+                <input type="number" id="inp-h" placeholder="Horas" min="0">
+                <input type="number" id="inp-m" placeholder="Min" min="0" max="59">
+                <input type="number" id="inp-s" placeholder="Seg" min="0" max="59">
+                <button class="btn-reset" id="apply-custom" style="padding: 0.6rem 1rem; border-radius: var(--btn-radius); border: var(--border); cursor: pointer; font-weight:bold;">Aplicar</button>
+            </div>
+
+            <div class="panel-title" style="margin-top: 1.5rem;">Alarma de YouTube</div>
+            <div class="input-row">
+                <label>Link:</label>
+                <input type="text" id="yt-url" placeholder="https://youtu.be/...">
+            </div>
+            <div class="input-row">
+                <label>Minuto:</label>
+                <input type="text" id="yt-start" placeholder="Ej: 1:15 o 75" value="0">
+                <button class="btn-reset" id="test-yt-btn" style="padding: 0.6rem; border-radius: var(--btn-radius); cursor: pointer; font-weight:bold;">Probar</button>
+            </div>
         </div>
 
-        <div class="time-display" id="time">25:00</div>
-
-        <div class="controls">
-            <button class="btn btn-main" id="start-btn">Iniciar</button>
-            <button class="btn btn-reset" id="reset-btn">Reiniciar</button>
+        <!-- PANEL DERECHO: Organizador -->
+        <div class="panel">
+            <div class="panel-title">Organizador / Tareas</div>
+            <div class="todo-input-container">
+                <input type="text" id="task-input" placeholder="Escribe una tarea y presiona Enter...">
+                <button class="btn-add" id="add-task-btn">+</button>
+            </div>
+            <ul class="task-list" id="task-list">
+                <!-- Tareas generadas por JS -->
+            </ul>
         </div>
     </div>
 
-    <!-- Panel de Ajustes (Personalización y Alarma YouTube) -->
-    <div class="settings-container">
-        <div class="settings-title">Tiempo Personalizado</div>
-        <div class="input-group">
-            <label>Minutos:</label>
-            <input type="number" id="custom-minutes" placeholder="Ej: 45" min="1">
-            <button class="btn-small" id="set-custom-time">Aplicar</button>
-        </div>
-
-        <div class="settings-title" style="margin-top: 1.5rem;">Alarma Épica (YouTube)</div>
-        <div class="input-group">
-            <label>Enlace del vídeo:</label>
-            <input type="text" id="yt-url" placeholder="https://youtu.be/...">
-        </div>
-        <div class="input-group">
-            <label>Minuto exacto:</label>
-            <input type="text" id="yt-start" placeholder="Ej: 1:15 o 75" value="0">
-        </div>
-        <div class="hint">Si se deja en blanco, sonará la campana profesional por defecto.</div>
-        <div style="text-align: right;">
-            <button class="btn-small" id="test-yt-btn">Probar Alarma YouTube</button>
-        </div>
-    </div>
-
-    <!-- Reproductor Modal Emergente -->
+    <!-- Modal YouTube -->
     <div id="yt-modal">
-        <div id="video-container"></div>
-        <button class="close-modal" id="close-modal-btn">Detener y Cerrar</button>
+        <div id="video-container" style="width: 100%; display:flex; justify-content:center;"></div>
+        <button class="close-modal" id="close-modal-btn">DETENER ALARMA</button>
     </div>
 
     <script>
+        // === GESTIÓN DE TEMAS ===
+        const themeSelector = document.getElementById('theme-selector');
+        // Cargar tema guardado
+        const savedTheme = localStorage.getItem('studyTimerTheme') || 'modern';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        themeSelector.value = savedTheme;
+
+        themeSelector.addEventListener('change', (e) => {
+            document.documentElement.setAttribute('data-theme', e.target.value);
+            localStorage.setItem('studyTimerTheme', e.target.value);
+        });
+
+
+        // === LÓGICA DEL TEMPORIZADOR ===
         const timeDisplay = document.getElementById('time');
         const startBtn = document.getElementById('start-btn');
         const resetBtn = document.getElementById('reset-btn');
         const modeBtns = document.querySelectorAll('.mode-btn:not(#custom-mode-btn)');
         const customModeBtn = document.getElementById('custom-mode-btn');
-        const ytModal = document.getElementById('yt-modal');
-        const videoContainer = document.getElementById('video-container');
 
         let defaultTime = 25 * 60;
         let timeLeft = defaultTime;
@@ -251,92 +323,26 @@
         let isRunning = false;
         let endTime = null;
 
-        function formatTime(seconds) {
-            const m = Math.floor(seconds / 60).toString().padStart(2, '0');
-            const s = (seconds % 60).toString().padStart(2, '0');
-            return `${m}:${s}`;
+        function formatTime(totalSeconds) {
+            const h = Math.floor(totalSeconds / 3600);
+            const m = Math.floor((totalSeconds % 3600) / 60);
+            const s = totalSeconds % 60;
+            
+            const mm = m.toString().padStart(2, '0');
+            const ss = s.toString().padStart(2, '0');
+            
+            if (h > 0) {
+                const hh = h.toString().padStart(2, '0');
+                return `${hh}:${mm}:${ss}`;
+            }
+            return `${mm}:${ss}`;
         }
 
         function updateDisplay() {
             const formatted = formatTime(timeLeft);
             timeDisplay.textContent = formatted;
-            document.title = `${formatted} - Temporizador`;
+            document.title = `${formatted} - Study Dashboard`;
         }
-
-        // --- SISTEMA DE ALARMAS ---
-
-        // Campana por defecto (Web Audio API)
-        function playDefaultAlarm() {
-            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            function beep(freq, startTime, duration) {
-                const oscillator = audioCtx.createOscillator();
-                const gainNode = audioCtx.createGain();
-                oscillator.type = 'sine';
-                oscillator.frequency.setValueAtTime(freq, audioCtx.currentTime);
-                gainNode.gain.setValueAtTime(0, startTime);
-                gainNode.gain.linearRampToValueAtTime(0.5, startTime + 0.05);
-                gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
-                oscillator.connect(gainNode);
-                gainNode.connect(audioCtx.destination);
-                oscillator.start(startTime);
-                oscillator.stop(startTime + duration);
-            }
-            beep(880, audioCtx.currentTime, 0.4);
-            beep(880, audioCtx.currentTime + 0.5, 0.4);
-        }
-
-        // Utilidades para procesar YouTube
-        function extractVideoID(url) {
-            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-            const match = url.match(regExp);
-            return (match && match[2].length === 11) ? match[2] : null;
-        }
-
-        function parseTimeToSeconds(timeStr) {
-            if (!timeStr) return 0;
-            if (timeStr.includes(':')) {
-                const parts = timeStr.split(':');
-                return parseInt(parts[0]) * 60 + parseInt(parts[1]);
-            }
-            return parseInt(timeStr) || 0;
-        }
-
-        // Reproductor de YouTube
-        function playYouTubeAlarm(url, startTimeStr) {
-            const videoId = extractVideoID(url);
-            if (!videoId) {
-                playDefaultAlarm(); // Si el link no es válido, suena la campana normal
-                return;
-            }
-
-            const startSeconds = parseTimeToSeconds(startTimeStr);
-            
-            // Inyectamos el iframe con autoplay habilitado
-            videoContainer.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1&start=${startSeconds}&rel=0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
-            ytModal.classList.add('active');
-        }
-
-        function triggerAlarm() {
-            const ytUrl = document.getElementById('yt-url').value;
-            const ytStart = document.getElementById('yt-start').value;
-
-            if (ytUrl.trim() !== '') {
-                playYouTubeAlarm(ytUrl, ytStart);
-            } else {
-                playDefaultAlarm();
-            }
-        }
-
-        // Cerrar Modal
-        document.getElementById('close-modal-btn').addEventListener('click', () => {
-            ytModal.classList.remove('active');
-            videoContainer.innerHTML = ''; // Destruye el iframe para detener el audio
-        });
-
-        // Probar alarma manual
-        document.getElementById('test-yt-btn').addEventListener('click', triggerAlarm);
-
-        // --- LÓGICA DEL TEMPORIZADOR ---
 
         function tick() {
             const now = Date.now();
@@ -354,17 +360,18 @@
 
         function startTimer() {
             if (isRunning) { stopTimer(); return; }
+            if (timeLeft <= 0) return;
             isRunning = true;
             endTime = Date.now() + (timeLeft * 1000);
             timerId = setInterval(tick, 200);
-            startBtn.textContent = 'Pausar';
+            startBtn.textContent = 'PAUSAR';
             startBtn.classList.add('pause');
         }
 
         function stopTimer() {
             isRunning = false;
             clearInterval(timerId);
-            startBtn.textContent = 'Iniciar';
+            startBtn.textContent = 'INICIAR';
             startBtn.classList.remove('pause');
         }
 
@@ -374,46 +381,152 @@
             updateDisplay();
         }
 
-        // --- EVENTOS ---
         startBtn.addEventListener('click', startTimer);
         resetBtn.addEventListener('click', resetTimer);
 
-        // Cambio de modos predefinidos
+        // Modos rápidos
         modeBtns.forEach(btn => {
             btn.addEventListener('click', (e) => {
                 document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
                 e.target.classList.add('active');
-                defaultTime = parseInt(e.target.dataset.time) * 60;
+                defaultTime = parseInt(e.target.dataset.sec);
                 resetTimer();
             });
         });
 
-        // Tiempo personalizado
-        document.getElementById('set-custom-time').addEventListener('click', () => {
-            const mins = document.getElementById('custom-minutes').value;
-            if (mins && mins > 0) {
+        // Tiempo Personalizado (H, M, S)
+        document.getElementById('apply-custom').addEventListener('click', () => {
+            const h = parseInt(document.getElementById('inp-h').value) || 0;
+            const m = parseInt(document.getElementById('inp-m').value) || 0;
+            const s = parseInt(document.getElementById('inp-s').value) || 0;
+            
+            const totalSecs = (h * 3600) + (m * 60) + s;
+            
+            if (totalSecs > 0) {
                 document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
                 customModeBtn.classList.add('active');
-                defaultTime = parseInt(mins) * 60;
+                defaultTime = totalSecs;
                 resetTimer();
             }
         });
 
-        customModeBtn.addEventListener('click', () => {
-            // Si hacen clic en el botón de manual pero ya hay un tiempo asignado, lo resetea a ese tiempo
-            const mins = document.getElementById('custom-minutes').value;
-            if (mins && mins > 0) {
-                document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-                customModeBtn.classList.add('active');
-                defaultTime = parseInt(mins) * 60;
-                resetTimer();
+
+        // === SISTEMA DE ALARMA Y YOUTUBE ===
+        const ytModal = document.getElementById('yt-modal');
+        const videoContainer = document.getElementById('video-container');
+
+        function playDefaultAlarm() {
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            function beep(freq, startTime, duration) {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine'; osc.frequency.value = freq;
+                gain.gain.setValueAtTime(0, startTime);
+                gain.gain.linearRampToValueAtTime(0.5, startTime + 0.05);
+                gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                osc.start(startTime); osc.stop(startTime + duration);
+            }
+            beep(880, audioCtx.currentTime, 0.4);
+            beep(880, audioCtx.currentTime + 0.5, 0.4);
+        }
+
+        function extractVideoID(url) {
+            const match = url.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/);
+            return (match && match[2].length === 11) ? match[2] : null;
+        }
+
+        function parseTimeToSeconds(timeStr) {
+            if (!timeStr) return 0;
+            if (timeStr.includes(':')) {
+                const parts = timeStr.split(':');
+                return parseInt(parts[0]) * 60 + parseInt(parts[1]);
+            }
+            return parseInt(timeStr) || 0;
+        }
+
+        function triggerAlarm() {
+            const ytUrl = document.getElementById('yt-url').value;
+            const ytStart = document.getElementById('yt-start').value;
+            const videoId = extractVideoID(ytUrl);
+
+            if (videoId) {
+                const startSec = parseTimeToSeconds(ytStart);
+                videoContainer.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1&start=${startSec}&rel=0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+                ytModal.classList.add('active');
             } else {
-                document.getElementById('custom-minutes').focus();
+                playDefaultAlarm();
             }
+        }
+
+        document.getElementById('test-yt-btn').addEventListener('click', triggerAlarm);
+        document.getElementById('close-modal-btn').addEventListener('click', () => {
+            ytModal.classList.remove('active');
+            videoContainer.innerHTML = ''; 
         });
 
-        // Inicializar
+
+        // === GESTOR DE TAREAS (TO-DO LIST) CON LOCALSTORAGE ===
+        const taskInput = document.getElementById('task-input');
+        const addTaskBtn = document.getElementById('add-task-btn');
+        const taskList = document.getElementById('task-list');
+
+        let tasks = JSON.parse(localStorage.getItem('studyTasks')) || [];
+
+        function saveTasks() {
+            localStorage.setItem('studyTasks', JSON.stringify(tasks));
+        }
+
+        function renderTasks() {
+            taskList.innerHTML = '';
+            tasks.forEach((task, index) => {
+                const li = document.createElement('li');
+                li.className = `task-item ${task.done ? 'done' : ''}`;
+                
+                li.innerHTML = `
+                    <span class="task-text">${task.text}</span>
+                    <div class="task-actions">
+                        <button class="btn-check" onclick="toggleTask(${index})">${task.done ? '↺' : '✓'}</button>
+                        <button class="btn-delete" onclick="deleteTask(${index})">✗</button>
+                    </div>
+                `;
+                // Al hacer clic en el texto también se tacha
+                li.querySelector('.task-text').addEventListener('click', () => toggleTask(index));
+                taskList.appendChild(li);
+            });
+        }
+
+        function addTask() {
+            const text = taskInput.value.trim();
+            if (text) {
+                tasks.push({ text: text, done: false });
+                taskInput.value = '';
+                saveTasks();
+                renderTasks();
+            }
+        }
+
+        window.toggleTask = function(index) {
+            tasks[index].done = !tasks[index].done;
+            saveTasks();
+            renderTasks();
+        }
+
+        window.deleteTask = function(index) {
+            tasks.splice(index, 1);
+            saveTasks();
+            renderTasks();
+        }
+
+        addTaskBtn.addEventListener('click', addTask);
+        taskInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addTask();
+        });
+
+        // Inicializar Todo
         updateDisplay();
+        renderTasks();
+
     </script>
 </body>
 </html>

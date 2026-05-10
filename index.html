@@ -3,502 +3,337 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Estudio Pro OS</title>
+    <title>Estudio Pro OS | Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
     <style>
-        /* === SISTEMA DE TEMAS === */
         :root {
-            --bg: #0f172a;
-            --surface: #1e293b;
-            --surface-alt: #334155;
-            --surface-hover: #475569;
-            --text: #f8fafc;
-            --text-dim: #94a3b8;
-            --primary: #3b82f6;
-            --danger: #ef4444;
-            --success: #10b981;
-            --font: system-ui, -apple-system, sans-serif;
-            --radius: 16px;
-            --border: 1px solid transparent;
-            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            /* TEMA MODERN (Default) */
+            --bg: #0b0f1a; --surface: #161b2c; --surface-alt: #232a3f;
+            --text: #ffffff; --text-dim: #94a3b8; --primary: #3b82f6;
+            --accent: #8b5cf6; --success: #10b981; --danger: #ef4444;
+            --font-main: 'Inter', sans-serif; --font-mono: 'JetBrains Mono', monospace;
+            --radius: 12px; --shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
-        [data-theme="minimalist"] {
-            --bg: #ffffff; --surface: #f9fafb; --surface-alt: #e5e7eb; --surface-hover: #d1d5db;
-            --text: #111827; --text-dim: #6b7280; --primary: #000000; --danger: #000000; --success: #000000;
-            --font: "Helvetica Neue", Arial, sans-serif; --radius: 4px; --border: 1px solid #e5e7eb; --shadow: none;
+        /* VARIACIONES DE TEMAS */
+        [data-theme="dracula"] {
+            --bg: #282a36; --surface: #44475a; --surface-alt: #6272a4;
+            --text: #f8f8f2; --text-dim: #94a3b8; --primary: #bd93f9; --accent: #ff79c6;
+        }
+        [data-theme="nord"] {
+            --bg: #2e3440; --surface: #3b4252; --surface-alt: #4c566a;
+            --text: #eceff4; --text-dim: #d8dee9; --primary: #88c0d0; --accent: #81a1c1;
+        }
+        [data-theme="matcha"] {
+            --bg: #f4f1ea; --surface: #ffffff; --surface-alt: #e9e5d9;
+            --text: #2d3748; --text-dim: #718096; --primary: #7ea172; --accent: #556b2f;
+        }
+        [data-theme="cyberpunk"] {
+            --bg: #000000; --surface: #111111; --surface-alt: #222222;
+            --text: #00ffcc; --text-dim: #ff003c; --primary: #fce300; --accent: #ff003c;
         }
 
-        [data-theme="retro"] {
-            --bg: #000000; --surface: #000000; --surface-alt: #002200; --surface-hover: #004400;
-            --text: #00ff00; --text-dim: #00aa00; --primary: #00ff00; --danger: #ff0000; --success: #00ff00;
-            --font: "Courier New", monospace; --radius: 0px; --border: 1px solid #00ff00; --shadow: 0 0 10px rgba(0,255,0,0.1);
+        * { box-sizing: border-box; margin: 0; padding: 0; transition: all 0.2s ease; }
+        body { background: var(--bg); color: var(--text); font-family: var(--font-main); display: flex; height: 100vh; overflow: hidden; }
+
+        /* SIDEBAR */
+        nav {
+            width: 260px; background: var(--surface); border-right: 1px solid var(--surface-alt);
+            display: flex; flex-direction: column; padding: 2rem 1rem;
         }
-
-        [data-theme="lofi"] {
-            --bg: #fdf6e3; --surface: #eee8d5; --surface-alt: #e2dabc; --surface-hover: #d5ccab;
-            --text: #586e75; --text-dim: #93a1a1; --primary: #d33682; --danger: #dc322f; --success: #859900;
-            --font: "Georgia", serif; --radius: 24px; --border: 2px solid #e2dabc; --shadow: 4px 4px 0px #e2dabc;
+        .logo { font-size: 1.4rem; font-weight: 800; margin-bottom: 2.5rem; text-align: center; color: var(--primary); }
+        .nav-link {
+            padding: 0.8rem 1rem; border-radius: var(--radius); cursor: pointer;
+            color: var(--text-dim); display: flex; align-items: center; gap: 12px;
+            text-decoration: none; font-weight: 600; margin-bottom: 0.5rem;
         }
+        .nav-link:hover, .nav-link.active { background: var(--surface-alt); color: var(--text); }
+        .nav-link.active { border-left: 4px solid var(--primary); }
 
-        /* === LAYOUT GLOBAL (APP) === */
-        * { box-sizing: border-box; margin: 0; padding: 0; transition: background-color 0.2s, color 0.2s; }
-        
-        body {
-            background-color: var(--bg); color: var(--text); font-family: var(--font);
-            display: flex; height: 100vh; overflow: hidden;
-        }
-
-        /* BARRA DE NAVEGACIÓN (SIDEBAR) */
-        .sidebar {
-            width: 250px; background-color: var(--surface); border-right: var(--border);
-            display: flex; flex-direction: column; padding: 1.5rem 1rem; z-index: 10;
-        }
-
-        .logo { font-size: 1.5rem; font-weight: bold; margin-bottom: 2rem; padding-left: 1rem; letter-spacing: -0.5px; }
-        .logo span { color: var(--primary); }
-
-        .nav-items { flex: 1; display: flex; flex-direction: column; gap: 0.5rem; }
-        
-        .nav-btn {
-            background: transparent; color: var(--text-dim); border: none; padding: 1rem;
-            text-align: left; font-size: 1rem; font-family: var(--font); border-radius: var(--radius);
-            cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 10px;
-        }
-        .nav-btn:hover { background-color: var(--surface-alt); color: var(--text); }
-        .nav-btn.active { background-color: var(--primary); color: var(--bg); }
-        [data-theme="modern"] .nav-btn.active { color: white; }
-
-        .theme-select-container { margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--surface-alt); }
-        select {
-            width: 100%; background-color: var(--surface-alt); color: var(--text);
-            border: var(--border); padding: 0.8rem; border-radius: var(--radius);
-            font-family: var(--font); cursor: pointer; outline: none;
-        }
-
-        /* ÁREA PRINCIPAL */
-        .main-content {
-            flex: 1; padding: 2rem; overflow-y: auto; display: flex; justify-content: center;
-        }
-
-        .view { display: none; width: 100%; max-width: 800px; animation: fadeIn 0.3s ease; }
+        /* MAIN */
+        main { flex: 1; padding: 2rem; overflow-y: auto; display: flex; flex-direction: column; align-items: center; }
+        .view { display: none; width: 100%; max-width: 900px; animation: slideUp 0.4s ease; }
         .view.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        .panel {
-            background-color: var(--surface); padding: 2rem; border-radius: var(--radius);
-            box-shadow: var(--shadow); border: var(--border); margin-bottom: 1.5rem;
-        }
+        /* CARDS */
+        .card { background: var(--surface); padding: 2rem; border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 1.5rem; border: 1px solid var(--surface-alt); }
+        .card-title { font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-dim); margin-bottom: 1.5rem; font-weight: 800; }
 
-        .panel-title { font-size: 1.2rem; color: var(--text-dim); margin-bottom: 1.5rem; border-bottom: 1px solid var(--surface-alt); padding-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px; }
-
-        /* === COMPONENTES === */
-        /* Temporizador */
-        .time-display { font-size: 6rem; font-weight: bold; text-align: center; margin: 1rem 0; font-variant-numeric: tabular-nums; line-height: 1; }
-        .controls { display: flex; justify-content: center; gap: 1rem; margin-bottom: 1.5rem; }
-        .btn { padding: 1rem 2rem; font-size: 1.1rem; font-weight: bold; font-family: var(--font); border: var(--border); border-radius: var(--radius); cursor: pointer; }
-        .btn-main { background-color: var(--success); color: var(--bg); }
-        .btn-main.pause { background-color: var(--danger); }
-        .btn-reset { background-color: var(--surface-alt); color: var(--text); }
-        [data-theme="modern"] .btn-main { color: white; }
+        /* TIMER H:M:S */
+        .timer-display { font-family: var(--font-mono); font-size: 6.5rem; font-weight: 800; text-align: center; margin: 1rem 0; letter-spacing: -2px; }
+        .progress-container { width: 100%; height: 6px; background: var(--surface-alt); border-radius: 10px; margin-bottom: 2rem; overflow: hidden; }
+        .progress-bar { height: 100%; background: linear-gradient(90deg, var(--primary), var(--accent)); width: 100%; }
         
-        .modes { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-        .mode-btn { background: var(--surface-alt); color: var(--text-dim); border: var(--border); padding: 0.6rem 1rem; border-radius: var(--radius); cursor: pointer; flex: 1; font-weight: bold; }
-        .mode-btn.active { background-color: var(--primary); color: var(--bg); }
-        [data-theme="modern"] .mode-btn.active { color: white; }
-
-        /* Stats */
-        .stats-container { display: flex; justify-content: space-around; text-align: center; background: var(--surface-alt); padding: 1rem; border-radius: var(--radius); }
-        .stat-value { font-size: 1.5rem; font-weight: bold; color: var(--primary); }
-        .stat-label { font-size: 0.8rem; color: var(--text-dim); text-transform: uppercase; }
-
-        /* Inputs Generales */
-        .input-row { display: flex; gap: 0.5rem; margin-bottom: 1rem; align-items: center; }
-        .input-row input { background: var(--surface-alt); color: var(--text); border: var(--border); padding: 0.8rem; border-radius: var(--radius); width: 100%; outline: none; font-family: var(--font); }
+        .timer-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 1.5rem; }
+        .timer-input-group { text-align: center; }
+        .timer-input-group label { font-size: 0.7rem; color: var(--text-dim); display: block; margin-bottom: 5px; }
+        .timer-input-group input { width: 100%; background: var(--surface-alt); border: 1px solid transparent; color: var(--text); padding: 0.8rem; border-radius: 8px; text-align: center; font-family: var(--font-mono); font-size: 1.2rem; }
         
-        /* Tareas */
-        .task-list { list-style: none; }
-        .task-item { display: flex; justify-content: space-between; align-items: center; background: var(--surface-alt); padding: 1rem; margin-bottom: 0.5rem; border-radius: var(--radius); }
-        .task-item.done span { text-decoration: line-through; opacity: 0.5; }
-        .task-actions button { background: none; border: none; font-size: 1.2rem; cursor: pointer; margin-left: 0.5rem; }
+        .btn-group { display: flex; gap: 1rem; justify-content: center; }
+        .btn { padding: 0.8rem 1.5rem; border-radius: 8px; border: none; cursor: pointer; font-weight: 700; text-transform: uppercase; font-size: 0.9rem; }
+        .btn-primary { background: var(--primary); color: #fff; }
+        .btn-danger { background: var(--danger); color: #fff; }
+        .btn-outline { background: var(--surface-alt); color: var(--text); }
 
-        /* Notas */
-        #quick-notes { width: 100%; height: 300px; background: var(--surface-alt); color: var(--text); border: var(--border); padding: 1rem; border-radius: var(--radius); font-family: var(--font); font-size: 1rem; resize: none; outline: none; }
+        /* LISTAS (Tareas y Deadlines) */
+        .item-list { list-style: none; }
+        .item { display: flex; align-items: center; justify-content: space-between; background: var(--surface-alt); padding: 1rem; border-radius: 8px; margin-bottom: 0.8rem; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; background: var(--primary); color: #000; }
 
-        /* Sonidos Ambientales */
-        .sound-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; }
-        .sound-card { background: var(--surface-alt); padding: 1.5rem; text-align: center; border-radius: var(--radius); cursor: pointer; border: var(--border); font-weight: bold; }
-        .sound-card:hover { background: var(--surface-hover); }
-        .sound-card.playing { background: var(--primary); color: var(--bg); }
-        [data-theme="modern"] .sound-card.playing { color: white; }
+        /* UTILS */
+        textarea { width: 100%; height: 200px; background: var(--surface-alt); color: var(--text); padding: 1rem; border-radius: 8px; border: none; resize: none; font-family: inherit; }
+        select { width: 100%; padding: 0.8rem; background: var(--surface-alt); color: var(--text); border-radius: 8px; border: none; }
 
-        /* Responsive Mobile */
+        /* MOBILE */
         @media (max-width: 768px) {
             body { flex-direction: column; }
-            .sidebar { width: 100%; height: auto; flex-direction: row; flex-wrap: wrap; padding: 1rem; justify-content: center; border-right: none; border-bottom: var(--border); order: 2; z-index: 100; background: var(--surface); box-shadow: 0 -5px 10px rgba(0,0,0,0.2); }
+            nav { width: 100%; height: auto; flex-direction: row; padding: 0.5rem; order: 2; overflow-x: auto; }
             .logo { display: none; }
-            .nav-items { flex-direction: row; width: 100%; justify-content: space-between; gap: 0; }
-            .nav-btn { flex: 1; justify-content: center; font-size: 0.8rem; padding: 0.8rem 0; flex-direction: column; gap: 4px; }
-            .theme-select-container { display: none; /* Oculto en móvil por espacio, lo pasamos a ajustes */ }
-            .main-content { order: 1; padding: 1rem; height: calc(100vh - 80px); }
+            .nav-link { margin-bottom: 0; font-size: 0.7rem; flex-direction: column; gap: 4px; min-width: 80px; }
+            main { order: 1; padding: 1rem; height: calc(100vh - 70px); }
+            .timer-display { font-size: 3.5rem; }
         }
-
-        /* Modal YouTube Alarma */
-        #yt-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; flex-direction: column; }
-        #yt-modal.active { display: flex; }
-        iframe { width: 90%; max-width: 800px; height: 450px; border: none; border-radius: var(--radius); }
     </style>
 </head>
 <body>
 
-    <!-- BARRA DE NAVEGACIÓN -->
-    <nav class="sidebar">
-        <div class="logo">Estudio<span>Pro</span></div>
-        <div class="nav-items">
-            <button class="nav-btn active" data-target="view-timer">⏱️ Timer</button>
-            <button class="nav-btn" data-target="view-tasks">📝 Tareas</button>
-            <button class="nav-btn" data-target="view-notes">📓 Notas</button>
-            <button class="nav-btn" data-target="view-sounds">🎧 Focus</button>
-            <button class="nav-btn" data-target="view-settings">⚙️ Ajustes</button>
-        </div>
-        <div class="theme-select-container">
-            <select id="theme-selector">
-                <option value="modern">Modo Oscuro</option>
-                <option value="minimalist">Minimalista</option>
-                <option value="retro">Hacker / Retro</option>
-                <option value="lofi">Lo-Fi Chill</option>
-            </select>
-        </div>
+    <nav>
+        <div class="logo">STUDY<span>OS</span></div>
+        <div class="nav-link active" data-target="timer-view">⏱️ Timer</div>
+        <div class="nav-link" data-target="tasks-view">📝 Tareas</div>
+        <div class="nav-link" data-target="deadlines-view">📅 Entregas</div>
+        <div class="nav-link" data-target="notes-view">📔 Notas</div>
+        <div class="nav-link" data-target="settings-view">⚙️ Ajustes</div>
     </nav>
 
-    <!-- ÁREA PRINCIPAL -->
-    <main class="main-content">
-        
-        <!-- VISTA: TEMPORIZADOR -->
-        <section id="view-timer" class="view active">
-            <div class="panel">
-                <div class="modes">
-                    <button class="mode-btn active" data-sec="1500">🍅 25m</button>
-                    <button class="mode-btn" data-sec="300">☕ 5m</button>
-                    <button class="mode-btn" data-sec="900">🚶 15m</button>
-                    <button class="mode-btn" data-sec="3000">🧠 50m</button>
+    <main>
+        <section id="timer-view" class="view active">
+            <div class="card">
+                <div class="card-title">Temporizador de Enfoque</div>
+                <div class="progress-container"><div class="progress-bar" id="pb"></div></div>
+                <div class="timer-display" id="display">00:25:00</div>
+                
+                <div class="timer-grid">
+                    <div class="timer-input-group"><label>HORAS</label><input type="number" id="h" value="0" min="0"></div>
+                    <div class="timer-input-group"><label>MINUTOS</label><input type="number" id="m" value="25" min="0" max="59"></div>
+                    <div class="timer-input-group"><label>SEGUNDOS</label><input type="number" id="s" value="0" min="0" max="59"></div>
                 </div>
-                <div class="time-display" id="time">25:00</div>
-                <div class="controls">
-                    <button class="btn btn-main" id="start-btn">INICIAR</button>
-                    <button class="btn btn-reset" id="reset-btn">RESET</button>
+
+                <div class="btn-group">
+                    <button class="btn btn-primary" id="start-btn">Iniciar Sesión</button>
+                    <button class="btn btn-outline" id="reset-btn">Reset</button>
                 </div>
             </div>
 
-            <div class="panel">
-                <div class="stats-container">
-                    <div>
-                        <div class="stat-value" id="pomodoro-count">0</div>
-                        <div class="stat-label">Sesiones Hoy</div>
-                    </div>
-                    <div>
-                        <div class="stat-value" id="total-minutes">0</div>
-                        <div class="stat-label">Minutos Totales</div>
-                    </div>
-                </div>
+            <div class="card">
+                <div class="card-title">Estadísticas de Hoy</div>
+                <p id="stats-text">Has completado 0 sesiones de estudio hoy.</p>
             </div>
         </section>
 
-        <!-- VISTA: TAREAS -->
-        <section id="view-tasks" class="view">
-            <div class="panel">
-                <div class="panel-title">Lista de Tareas (To-Do)</div>
-                <div class="input-row">
-                    <input type="text" id="task-input" placeholder="Nueva tarea (Ej: Leer tema 4)...">
-                    <button class="btn btn-main" id="add-task-btn" style="padding: 0.8rem 1.5rem;">Añadir</button>
+        <section id="tasks-view" class="view">
+            <div class="card">
+                <div class="card-title">Tareas Pendientes</div>
+                <div style="display: flex; gap: 10px; margin-bottom: 1.5rem;">
+                    <input type="text" id="task-in" style="flex:1; background: var(--surface-alt); border:none; padding: 10px; border-radius: 5px; color: #fff;" placeholder="Ej: Estudiar Anatomía...">
+                    <button class="btn btn-primary" id="add-task">Añadir</button>
                 </div>
-                <ul class="task-list" id="task-list"></ul>
+                <ul class="item-list" id="task-list"></ul>
             </div>
         </section>
 
-        <!-- VISTA: NOTAS RÁPIDAS -->
-        <section id="view-notes" class="view">
-            <div class="panel">
-                <div class="panel-title">Bloc de Notas Rápido</div>
-                <p style="font-size: 0.85rem; color: var(--text-dim); margin-bottom: 1rem;">Todo lo que escribas se guardará automáticamente en tu navegador.</p>
-                <textarea id="quick-notes" placeholder="Escribe aquí ideas, dudas, fórmulas..."></textarea>
+        <section id="deadlines-view" class="view">
+            <div class="card">
+                <div class="card-title">Próximos Exámenes / Entregas</div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; margin-bottom: 1.5rem;">
+                    <input type="text" id="dead-name" style="background: var(--surface-alt); border:none; padding: 10px; border-radius: 5px; color:#fff;" placeholder="Nombre...">
+                    <input type="date" id="dead-date" style="background: var(--surface-alt); border:none; padding: 10px; border-radius: 5px; color:#fff;">
+                    <button class="btn btn-primary" id="add-dead">Añadir</button>
+                </div>
+                <ul class="item-list" id="dead-list"></ul>
             </div>
         </section>
 
-        <!-- VISTA: SONIDOS AMBIENTALES -->
-        <section id="view-sounds" class="view">
-            <div class="panel">
-                <div class="panel-title">Fondo Musical para Estudiar</div>
-                <p style="font-size: 0.85rem; color: var(--text-dim); margin-bottom: 1.5rem;">Haz clic en un ambiente para reproducirlo de fondo a través de YouTube oculto.</p>
-                <div class="sound-grid">
-                    <div class="sound-card" onclick="playAmbient('jfKfPfyJRdk', this)">🎧 Lofi Girl</div>
-                    <div class="sound-card" onclick="playAmbient('mPZkdNFkNps', this)">🌧️ Lluvia Suave</div>
-                    <div class="sound-card" onclick="playAmbient('hBGbt2CRDpA', this)">🟫 Ruido Marrón</div>
-                    <div class="sound-card" onclick="playAmbient('BOjp6Xm8f8g', this)">☕ Cafetería</div>
-                    <div class="sound-card" onclick="stopAmbient(this)" style="background: var(--danger); color: white;">⏹️ Detener Todo</div>
-                </div>
-                <div id="ambient-player" style="display: none;"></div>
+        <section id="notes-view" class="view">
+            <div class="card">
+                <div class="card-title">Bloc de Notas Rápido</div>
+                <textarea id="notes-area" placeholder="Escribe tus pensamientos aquí..."></textarea>
             </div>
         </section>
 
-        <!-- VISTA: AJUSTES & ALARMA -->
-        <section id="view-settings" class="view">
-            <div class="panel">
-                <div class="panel-title">Ajustes del Temporizador</div>
-                <p style="font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--text-dim);">Tiempo Personalizado (Minutos):</p>
-                <div class="input-row">
-                    <input type="number" id="custom-minutes" placeholder="Ej: 45" min="1">
-                    <button class="btn btn-reset" id="apply-custom-btn" style="padding: 0.8rem 1.5rem;">Aplicar</button>
-                </div>
+        <section id="settings-view" class="view">
+            <div class="card">
+                <div class="card-title">Personalización de Interfaz</div>
+                <label style="font-size: 0.8rem; color:var(--text-dim);">SELECCIONAR TEMA:</label>
+                <select id="theme-change" style="margin-top: 10px;">
+                    <option value="modern">Modern Dark (Default)</option>
+                    <option value="dracula">Dracula (Dev Pro)</option>
+                    <option value="nord">Nordic Blue</option>
+                    <option value="matcha">Matcha Green (Light)</option>
+                    <option value="cyberpunk">Cyberpunk Neon</option>
+                </select>
             </div>
-
-            <div class="panel">
-                <div class="panel-title">Alarma Épica (YouTube)</div>
-                <p style="font-size: 0.9rem; margin-bottom: 1rem; color: var(--text-dim);">Pega un link de YouTube para que suene al terminar. Si lo dejas vacío, sonará la campana por defecto.</p>
-                <div class="input-row">
-                    <input type="text" id="yt-url" placeholder="Enlace de YouTube...">
-                </div>
-                <div class="input-row">
-                    <input type="text" id="yt-start" placeholder="Segundo de inicio (Ej: 60)" value="0">
-                    <button class="btn btn-reset" id="test-yt-btn" style="padding: 0.8rem;">Probar</button>
-                </div>
+            <div class="card">
+                <div class="card-title">Alarma YouTube</div>
+                <input type="text" id="yt-url" style="width:100%; background: var(--surface-alt); border:none; padding: 12px; border-radius: 5px; color:#fff;" placeholder="URL de video de YouTube...">
             </div>
         </section>
-
     </main>
 
-    <!-- Modal Emergente YouTube Alarma -->
-    <div id="yt-modal">
-        <div id="video-container" style="width: 100%; display:flex; justify-content:center;"></div>
-        <button id="close-modal-btn" style="background: var(--danger); color: white; border: none; padding: 0.8rem 2rem; border-radius: 8px; margin-top: 1.5rem; cursor: pointer; font-weight: bold;">DETENER ALARMA</button>
+    <div id="alarm-box" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:9999; flex-direction:column; align-items:center; justify-content:center;">
+        <div id="video-container"></div>
+        <button class="btn btn-danger" id="stop-alarm" style="margin-top:20px;">DETENER ALARMA Y VOLVER</button>
     </div>
 
     <script>
-        // === 1. NAVEGACIÓN Y VISTAS ===
-        const navBtns = document.querySelectorAll('.nav-btn');
-        const views = document.querySelectorAll('.view');
-
-        navBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                // Quitar active a todos
-                navBtns.forEach(b => b.classList.remove('active'));
-                views.forEach(v => v.classList.remove('active'));
-                // Poner active al clickeado
-                btn.classList.add('active');
-                document.getElementById(btn.dataset.target).classList.add('active');
-            });
-        });
-
-        // === 2. GESTIÓN DE TEMAS ===
-        const themeSelector = document.getElementById('theme-selector');
-        const savedTheme = localStorage.getItem('studyOS_Theme') || 'modern';
-        document.documentElement.setAttribute('data-theme', savedTheme);
-        themeSelector.value = savedTheme;
-
-        themeSelector.addEventListener('change', (e) => {
-            document.documentElement.setAttribute('data-theme', e.target.value);
-            localStorage.setItem('studyOS_Theme', e.target.value);
-        });
-
-        // === 3. ESTADÍSTICAS (POMODOROS) ===
-        let sessionCount = parseInt(localStorage.getItem('studyOS_Sessions')) || 0;
-        let totalMinutes = parseInt(localStorage.getItem('studyOS_Minutes')) || 0;
-        
-        function updateStatsUI() {
-            document.getElementById('pomodoro-count').textContent = sessionCount;
-            document.getElementById('total-minutes').textContent = totalMinutes;
-        }
-        updateStatsUI();
-
-        // === 4. LÓGICA DEL TEMPORIZADOR ===
-        const timeDisplay = document.getElementById('time');
-        const startBtn = document.getElementById('start-btn');
-        const resetBtn = document.getElementById('reset-btn');
-        const modeBtns = document.querySelectorAll('.mode-btn');
-
-        let defaultTime = 25 * 60;
-        let timeLeft = defaultTime;
+        // ESTADO GLOBAL
+        let timeLeft = 1500;
+        let totalSeconds = 1500;
         let timerId = null;
         let isRunning = false;
-        let endTime = null;
-        let currentSessionMins = 25; // Para sumar a las estadísticas
+        let sessionsToday = parseInt(localStorage.getItem('study_sessions')) || 0;
 
-        function formatTime(seconds) {
-            const m = Math.floor(seconds / 60).toString().padStart(2, '0');
-            const s = (seconds % 60).toString().padStart(2, '0');
-            return `${m}:${s}`;
-        }
+        // ELEMENTOS
+        const display = document.getElementById('display');
+        const startBtn = document.getElementById('start-btn');
+        const pb = document.getElementById('pb');
 
-        function updateDisplay() {
-            const formatted = formatTime(timeLeft);
-            timeDisplay.textContent = formatted;
-            document.title = isRunning ? `${formatted} - Estudiando` : 'Estudio Pro OS';
-        }
-
-        function finishSession() {
-            stopTimer();
-            timeLeft = 0;
-            updateDisplay();
-            
-            // Sumar estadísticas
-            sessionCount++;
-            totalMinutes += currentSessionMins;
-            localStorage.setItem('studyOS_Sessions', sessionCount);
-            localStorage.setItem('studyOS_Minutes', totalMinutes);
-            updateStatsUI();
-
-            triggerAlarm();
-        }
-
-        function tick() {
-            const now = Date.now();
-            timeLeft = Math.round((endTime - now) / 1000);
-            if (timeLeft <= 0) { finishSession(); return; }
-            updateDisplay();
-        }
-
-        function startTimer() {
-            if (isRunning) { stopTimer(); return; }
-            if (timeLeft <= 0) return;
-            isRunning = true;
-            endTime = Date.now() + (timeLeft * 1000);
-            timerId = setInterval(tick, 200);
-            startBtn.textContent = 'PAUSAR';
-            startBtn.classList.add('pause');
-        }
-
-        function stopTimer() {
-            isRunning = false;
-            clearInterval(timerId);
-            startBtn.textContent = 'INICIAR';
-            startBtn.classList.remove('pause');
-        }
-
-        function resetTimer() {
-            stopTimer();
-            timeLeft = defaultTime;
-            updateDisplay();
-        }
-
-        startBtn.addEventListener('click', startTimer);
-        resetBtn.addEventListener('click', resetTimer);
-
-        modeBtns.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                modeBtns.forEach(b => b.classList.remove('active'));
-                e.target.classList.add('active');
-                defaultTime = parseInt(e.target.dataset.sec);
-                currentSessionMins = defaultTime / 60;
-                resetTimer();
+        // NAVEGACIÓN
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                document.querySelectorAll('.nav-link, .view').forEach(el => el.classList.remove('active'));
+                link.classList.add('active');
+                document.getElementById(link.dataset.target).classList.add('active');
             });
         });
 
-        document.getElementById('apply-custom-btn').addEventListener('click', () => {
-            const mins = parseInt(document.getElementById('custom-minutes').value);
-            if (mins > 0) {
-                modeBtns.forEach(b => b.classList.remove('active'));
-                defaultTime = mins * 60;
-                currentSessionMins = mins;
-                resetTimer();
-                // Navegar de vuelta al timer
-                navBtns[0].click();
+        // TIMER LOGIC
+        function updateDisplay() {
+            const h = Math.floor(timeLeft / 3600);
+            const m = Math.floor((timeLeft % 3600) / 60);
+            const s = timeLeft % 60;
+            display.textContent = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+            const perc = (timeLeft / totalSeconds) * 100;
+            pb.style.width = `${perc}%`;
+        }
+
+        startBtn.addEventListener('click', () => {
+            if (isRunning) {
+                clearInterval(timerId);
+                isRunning = false;
+                startBtn.textContent = "Reanudar";
+                startBtn.className = "btn btn-primary";
+            } else {
+                if (timeLeft === totalSeconds || timeLeft === 0) {
+                    const hh = parseInt(document.getElementById('h').value) || 0;
+                    const mm = parseInt(document.getElementById('m').value) || 0;
+                    const ss = parseInt(document.getElementById('s').value) || 0;
+                    totalSeconds = (hh * 3600) + (mm * 60) + ss;
+                    timeLeft = totalSeconds;
+                }
+                if (timeLeft <= 0) return;
+                isRunning = true;
+                startBtn.textContent = "Pausar";
+                startBtn.className = "btn btn-danger";
+                timerId = setInterval(() => {
+                    timeLeft--;
+                    updateDisplay();
+                    if (timeLeft <= 0) {
+                        clearInterval(timerId);
+                        triggerAlarm();
+                        sessionsToday++;
+                        localStorage.setItem('study_sessions', sessionsToday);
+                        renderStats();
+                    }
+                }, 1000);
             }
         });
 
-        // === 5. ALARMA Y YOUTUBE ===
-        const ytModal = document.getElementById('yt-modal');
-        const videoContainer = document.getElementById('video-container');
+        document.getElementById('reset-btn').addEventListener('click', () => {
+            clearInterval(timerId);
+            isRunning = false;
+            timeLeft = totalSeconds;
+            startBtn.textContent = "Iniciar Sesión";
+            startBtn.className = "btn btn-primary";
+            updateDisplay();
+        });
 
-        function playDefaultAlarm() {
-            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            function beep(freq, start, dur) {
-                const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-                osc.type = 'sine'; osc.frequency.value = freq;
-                gain.gain.setValueAtTime(0, start);
-                gain.gain.linearRampToValueAtTime(0.5, start + 0.05);
-                gain.gain.exponentialRampToValueAtTime(0.001, start + dur);
-                osc.connect(gain); gain.connect(audioCtx.destination);
-                osc.start(start); osc.stop(start + dur);
-            }
-            beep(880, audioCtx.currentTime, 0.4); beep(880, audioCtx.currentTime + 0.5, 0.4);
-        }
-
+        // ALARMA
         function triggerAlarm() {
             const url = document.getElementById('yt-url').value;
-            const startSec = document.getElementById('yt-start').value || 0;
-            const match = url.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/);
-            const videoId = (match && match[2].length === 11) ? match[2] : null;
-
-            if (videoId) {
-                videoContainer.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1&start=${startSec}&rel=0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
-                ytModal.classList.add('active');
+            const box = document.getElementById('alarm-box');
+            const container = document.getElementById('video-container');
+            box.style.display = 'flex';
+            if(url.includes('v=')) {
+                const id = url.split('v=')[1].split('&')[0];
+                container.innerHTML = `<iframe width="560" height="315" src="https://www.youtube.com/embed/${id}?autoplay=1" frameborder="0" allow="autoplay"></iframe>`;
             } else {
-                playDefaultAlarm();
+                container.innerHTML = `<h1 style="color:white">¡TIEMPO TERMINADO!</h1>`;
+                const audio = new AudioContext(); // Simple beep if no YT
             }
         }
-
-        document.getElementById('test-yt-btn').addEventListener('click', triggerAlarm);
-        document.getElementById('close-modal-btn').addEventListener('click', () => {
-            ytModal.classList.remove('active');
-            videoContainer.innerHTML = ''; 
+        document.getElementById('stop-alarm').addEventListener('click', () => {
+            document.getElementById('alarm-box').style.display = 'none';
+            document.getElementById('video-container').innerHTML = '';
         });
 
-        // === 6. TAREAS (TO-DO) ===
-        const taskInput = document.getElementById('task-input');
-        const taskList = document.getElementById('task-list');
-        let tasks = JSON.parse(localStorage.getItem('studyOS_Tasks')) || [];
-
+        // TAREAS
+        let tasks = JSON.parse(localStorage.getItem('study_tasks')) || [];
         function renderTasks() {
-            taskList.innerHTML = '';
+            const list = document.getElementById('task-list');
+            list.innerHTML = '';
             tasks.forEach((t, i) => {
                 const li = document.createElement('li');
-                li.className = `task-item ${t.done ? 'done' : ''}`;
-                li.innerHTML = `
-                    <span style="flex:1; cursor:pointer;" onclick="toggleTask(${i})">${t.text}</span>
-                    <div class="task-actions">
-                        <button style="color:var(--danger);" onclick="deleteTask(${i})">✗</button>
-                    </div>`;
-                taskList.appendChild(li);
+                li.className = 'item';
+                li.innerHTML = `<span>${t}</span><button class="btn btn-danger" style="padding:5px 10px" onclick="removeTask(${i})">X</button>`;
+                list.appendChild(li);
             });
-            localStorage.setItem('studyOS_Tasks', JSON.stringify(tasks));
+            localStorage.setItem('study_tasks', JSON.stringify(tasks));
         }
-
-        function addTask() {
-            if (taskInput.value.trim()) {
-                tasks.push({ text: taskInput.value.trim(), done: false });
-                taskInput.value = '';
-                renderTasks();
-            }
-        }
-        document.getElementById('add-task-btn').addEventListener('click', addTask);
-        taskInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') addTask(); });
-
-        window.toggleTask = i => { tasks[i].done = !tasks[i].done; renderTasks(); };
-        window.deleteTask = i => { tasks.splice(i, 1); renderTasks(); };
-
-        // === 7. BLOC DE NOTAS CON AUTOGUARDADO ===
-        const notesArea = document.getElementById('quick-notes');
-        notesArea.value = localStorage.getItem('studyOS_Notes') || '';
-        notesArea.addEventListener('input', () => {
-            localStorage.setItem('studyOS_Notes', notesArea.value);
+        document.getElementById('add-task').addEventListener('click', () => {
+            const val = document.getElementById('task-in').value;
+            if(val) { tasks.push(val); document.getElementById('task-in').value = ''; renderTasks(); }
         });
+        window.removeTask = (i) => { tasks.splice(i, 1); renderTasks(); };
 
-        // === 8. REPRODUCTOR DE AMBIENTE (FOCUS) ===
-        const ambientContainer = document.getElementById('ambient-player');
-        function playAmbient(videoId, btnElement) {
-            document.querySelectorAll('.sound-card').forEach(c => c.classList.remove('playing'));
-            btnElement.classList.add('playing');
-            // Carga un iframe oculto o de 1x1 píxel para reproducir audio
-            ambientContainer.innerHTML = `<iframe width="1" height="1" src="https://www.youtube.com/embed/${videoId}?autoplay=1&loop=1&playlist=${videoId}" frameborder="0" allow="autoplay" allowfullscreen></iframe>`;
+        // ENTREGAS (DEADLINES)
+        let deadlines = JSON.parse(localStorage.getItem('study_deadlines')) || [];
+        function renderDeadlines() {
+            const list = document.getElementById('dead-list');
+            list.innerHTML = '';
+            deadlines.forEach((d, i) => {
+                const diff = Math.ceil((new Date(d.date) - new Date()) / (1000*60*60*24));
+                const li = document.createElement('li');
+                li.className = 'item';
+                li.innerHTML = `<div><b>${d.name}</b><br><small>${d.date}</small></div> <span class="badge">${diff} días faltan</span> <button class="btn btn-danger" style="padding:5px 10px" onclick="removeDead(${i})">X</button>`;
+                list.appendChild(li);
+            });
+            localStorage.setItem('study_deadlines', JSON.stringify(deadlines));
         }
+        document.getElementById('add-dead').addEventListener('click', () => {
+            const n = document.getElementById('dead-name').value;
+            const d = document.getElementById('dead-date').value;
+            if(n && d) { deadlines.push({name: n, date: d}); renderDeadlines(); }
+        });
+        window.removeDead = (i) => { deadlines.splice(i, 1); renderDeadlines(); };
+
+        // NOTAS Y TEMAS
+        document.getElementById('notes-area').value = localStorage.getItem('study_notes') || '';
+        document.getElementById('notes-area').addEventListener('input', (e) => localStorage.setItem('study_notes', e.target.value));
+
+        document.getElementById('theme-change').addEventListener('change', (e) => {
+            document.documentElement.setAttribute('data-theme', e.target.value);
+            localStorage.setItem('study_theme', e.target.value);
+        });
         
-        window.stopAmbient = function(btnElement) {
-            document.querySelectorAll('.sound-card').forEach(c => c.classList.remove('playing'));
-            ambientContainer.innerHTML = ''; // Destruye el iframe parando el sonido
-        }
+        function renderStats() { document.getElementById('stats-text').textContent = `Has completado ${sessionsToday} sesiones de estudio hoy. ¡Buen trabajo!`; }
 
-        // Inicialización
-        updateDisplay();
-        renderTasks();
+        // INIT
+        const st = localStorage.getItem('study_theme') || 'modern';
+        document.documentElement.setAttribute('data-theme', st);
+        document.getElementById('theme-change').value = st;
+        renderTasks(); renderDeadlines(); renderStats(); updateDisplay();
     </script>
 </body>
 </html>

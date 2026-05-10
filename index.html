@@ -41,7 +41,14 @@
             width: 260px; background: var(--surface); border-right: 1px solid var(--surface-alt);
             display: flex; flex-direction: column; padding: 2rem 1rem;
         }
-        .logo { font-size: 1.4rem; font-weight: 800; margin-bottom: 2.5rem; text-align: center; color: var(--primary); }
+        .logo { font-size: 1.4rem; font-weight: 800; margin-bottom: 1.5rem; text-align: center; color: var(--primary); }
+        
+        #profile-selector {
+            background: var(--primary); color: white; font-weight: bold; border: none;
+            padding: 0.8rem; border-radius: var(--radius); width: 100%; margin-bottom: 2rem;
+            cursor: pointer; text-align: center; outline: none;
+        }
+
         .nav-link {
             padding: 0.8rem 1rem; border-radius: var(--radius); cursor: pointer;
             color: var(--text-dim); display: flex; align-items: center; gap: 12px;
@@ -76,7 +83,7 @@
         .btn-danger { background: var(--danger); color: #fff; }
         .btn-outline { background: var(--surface-alt); color: var(--text); }
 
-        /* LISTAS (Tareas y Deadlines) */
+        /* LISTAS */
         .item-list { list-style: none; }
         .item { display: flex; align-items: center; justify-content: space-between; background: var(--surface-alt); padding: 1rem; border-radius: 8px; margin-bottom: 0.8rem; }
         .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; background: var(--primary); color: #000; }
@@ -88,10 +95,11 @@
         /* MOBILE */
         @media (max-width: 768px) {
             body { flex-direction: column; }
-            nav { width: 100%; height: auto; flex-direction: row; padding: 0.5rem; order: 2; overflow-x: auto; }
+            nav { width: 100%; height: auto; flex-direction: row; flex-wrap: wrap; padding: 0.5rem; order: 2; overflow-x: auto; }
             .logo { display: none; }
+            #profile-selector { margin-bottom: 0.5rem; }
             .nav-link { margin-bottom: 0; font-size: 0.7rem; flex-direction: column; gap: 4px; min-width: 80px; }
-            main { order: 1; padding: 1rem; height: calc(100vh - 70px); }
+            main { order: 1; padding: 1rem; height: calc(100vh - 120px); }
             .timer-display { font-size: 3.5rem; }
         }
     </style>
@@ -100,6 +108,9 @@
 
     <nav>
         <div class="logo">STUDY<span>OS</span></div>
+        
+        <select id="profile-selector"></select>
+
         <div class="nav-link active" data-target="timer-view">⏱️ Timer</div>
         <div class="nav-link" data-target="tasks-view">📝 Tareas</div>
         <div class="nav-link" data-target="deadlines-view">📅 Entregas</div>
@@ -127,7 +138,7 @@
             </div>
 
             <div class="card">
-                <div class="card-title">Estadísticas de Hoy</div>
+                <div class="card-title">Estadísticas de <span id="stats-name">Hoy</span></div>
                 <p id="stats-text">Has completado 0 sesiones de estudio hoy.</p>
             </div>
         </section>
@@ -164,8 +175,18 @@
 
         <section id="settings-view" class="view">
             <div class="card">
+                <div class="card-title">👥 Gestión de Perfiles</div>
+                <p style="font-size:0.8rem; color:var(--text-dim); margin-bottom:10px;">Cambia los nombres de los perfiles aquí:</p>
+                <div style="display: flex; gap: 10px; margin-bottom: 1rem;">
+                    <input type="text" id="p1-name" style="flex:1; background: var(--surface-alt); border:none; padding: 10px; border-radius: 5px; color: #fff;" placeholder="Nombre Perfil 1">
+                    <input type="text" id="p2-name" style="flex:1; background: var(--surface-alt); border:none; padding: 10px; border-radius: 5px; color: #fff;" placeholder="Nombre Perfil 2">
+                </div>
+                <button class="btn btn-outline" id="save-profiles">Actualizar Nombres</button>
+            </div>
+
+            <div class="card">
                 <div class="card-title">Personalización de Interfaz</div>
-                <label style="font-size: 0.8rem; color:var(--text-dim);">SELECCIONAR TEMA:</label>
+                <label style="font-size: 0.8rem; color:var(--text-dim);">SELECCIONAR TEMA (Se guarda para tu perfil):</label>
                 <select id="theme-change" style="margin-top: 10px;">
                     <option value="modern">Modern Dark (Default)</option>
                     <option value="dracula">Dracula (Dev Pro)</option>
@@ -187,12 +208,41 @@
     </div>
 
     <script>
-        // ESTADO GLOBAL
+        // === SISTEMA DE PERFILES ===
+        let profilesData = JSON.parse(localStorage.getItem('study_profiles_names')) || { p1: 'Perfil 1', p2: 'Perfil 2' };
+        let activeProfile = localStorage.getItem('study_active_profile') || 'p1';
+
+        const profileSelect = document.getElementById('profile-selector');
+        profileSelect.innerHTML = `<option value="p1">👤 ${profilesData.p1}</option><option value="p2">👤 ${profilesData.p2}</option>`;
+        profileSelect.value = activeProfile;
+
+        // Cambiar de perfil recarga la página para cargar los datos del otro usuario
+        profileSelect.addEventListener('change', (e) => {
+            localStorage.setItem('study_active_profile', e.target.value);
+            location.reload(); 
+        });
+
+        // Actualizar nombres desde los ajustes
+        document.getElementById('p1-name').value = profilesData.p1;
+        document.getElementById('p2-name').value = profilesData.p2;
+        document.getElementById('stats-name').textContent = activeProfile === 'p1' ? profilesData.p1 : profilesData.p2;
+
+        document.getElementById('save-profiles').addEventListener('click', () => {
+            profilesData.p1 = document.getElementById('p1-name').value || 'Perfil 1';
+            profilesData.p2 = document.getElementById('p2-name').value || 'Perfil 2';
+            localStorage.setItem('study_profiles_names', JSON.stringify(profilesData));
+            location.reload();
+        });
+
+        // Función auxiliar para aislar los datos por perfil (añade 'p1_' o 'p2_' a las variables)
+        const getLocalKey = (key) => `${activeProfile}_${key}`;
+
+        // === ESTADO GLOBAL ===
         let timeLeft = 1500;
         let totalSeconds = 1500;
         let timerId = null;
         let isRunning = false;
-        let sessionsToday = parseInt(localStorage.getItem('study_sessions')) || 0;
+        let sessionsToday = parseInt(localStorage.getItem(getLocalKey('study_sessions'))) || 0;
 
         // ELEMENTOS
         const display = document.getElementById('display');
@@ -208,7 +258,7 @@
             });
         });
 
-        // TIMER LOGIC
+        // === TIMER LOGIC ===
         function updateDisplay() {
             const h = Math.floor(timeLeft / 3600);
             const m = Math.floor((timeLeft % 3600) / 60);
@@ -243,7 +293,7 @@
                         clearInterval(timerId);
                         triggerAlarm();
                         sessionsToday++;
-                        localStorage.setItem('study_sessions', sessionsToday);
+                        localStorage.setItem(getLocalKey('study_sessions'), sessionsToday);
                         renderStats();
                     }
                 }, 1000);
@@ -259,7 +309,7 @@
             updateDisplay();
         });
 
-        // ALARMA
+        // === ALARMA ===
         function triggerAlarm() {
             const url = document.getElementById('yt-url').value;
             const box = document.getElementById('alarm-box');
@@ -270,7 +320,7 @@
                 container.innerHTML = `<iframe width="560" height="315" src="https://www.youtube.com/embed/${id}?autoplay=1" frameborder="0" allow="autoplay"></iframe>`;
             } else {
                 container.innerHTML = `<h1 style="color:white">¡TIEMPO TERMINADO!</h1>`;
-                const audio = new AudioContext(); // Simple beep if no YT
+                const audio = new window.AudioContext(); // Beep por defecto
             }
         }
         document.getElementById('stop-alarm').addEventListener('click', () => {
@@ -278,8 +328,8 @@
             document.getElementById('video-container').innerHTML = '';
         });
 
-        // TAREAS
-        let tasks = JSON.parse(localStorage.getItem('study_tasks')) || [];
+        // === TAREAS (Aisladas por perfil) ===
+        let tasks = JSON.parse(localStorage.getItem(getLocalKey('study_tasks'))) || [];
         function renderTasks() {
             const list = document.getElementById('task-list');
             list.innerHTML = '';
@@ -289,7 +339,7 @@
                 li.innerHTML = `<span>${t}</span><button class="btn btn-danger" style="padding:5px 10px" onclick="removeTask(${i})">X</button>`;
                 list.appendChild(li);
             });
-            localStorage.setItem('study_tasks', JSON.stringify(tasks));
+            localStorage.setItem(getLocalKey('study_tasks'), JSON.stringify(tasks));
         }
         document.getElementById('add-task').addEventListener('click', () => {
             const val = document.getElementById('task-in').value;
@@ -297,8 +347,8 @@
         });
         window.removeTask = (i) => { tasks.splice(i, 1); renderTasks(); };
 
-        // ENTREGAS (DEADLINES)
-        let deadlines = JSON.parse(localStorage.getItem('study_deadlines')) || [];
+        // === ENTREGAS (Aisladas por perfil) ===
+        let deadlines = JSON.parse(localStorage.getItem(getLocalKey('study_deadlines'))) || [];
         function renderDeadlines() {
             const list = document.getElementById('dead-list');
             list.innerHTML = '';
@@ -309,7 +359,7 @@
                 li.innerHTML = `<div><b>${d.name}</b><br><small>${d.date}</small></div> <span class="badge">${diff} días faltan</span> <button class="btn btn-danger" style="padding:5px 10px" onclick="removeDead(${i})">X</button>`;
                 list.appendChild(li);
             });
-            localStorage.setItem('study_deadlines', JSON.stringify(deadlines));
+            localStorage.setItem(getLocalKey('study_deadlines'), JSON.stringify(deadlines));
         }
         document.getElementById('add-dead').addEventListener('click', () => {
             const n = document.getElementById('dead-name').value;
@@ -318,19 +368,19 @@
         });
         window.removeDead = (i) => { deadlines.splice(i, 1); renderDeadlines(); };
 
-        // NOTAS Y TEMAS
-        document.getElementById('notes-area').value = localStorage.getItem('study_notes') || '';
-        document.getElementById('notes-area').addEventListener('input', (e) => localStorage.setItem('study_notes', e.target.value));
+        // === NOTAS Y TEMAS (Aislados por perfil) ===
+        document.getElementById('notes-area').value = localStorage.getItem(getLocalKey('study_notes')) || '';
+        document.getElementById('notes-area').addEventListener('input', (e) => localStorage.setItem(getLocalKey('study_notes'), e.target.value));
 
         document.getElementById('theme-change').addEventListener('change', (e) => {
             document.documentElement.setAttribute('data-theme', e.target.value);
-            localStorage.setItem('study_theme', e.target.value);
+            localStorage.setItem(getLocalKey('study_theme'), e.target.value);
         });
         
         function renderStats() { document.getElementById('stats-text').textContent = `Has completado ${sessionsToday} sesiones de estudio hoy. ¡Buen trabajo!`; }
 
-        // INIT
-        const st = localStorage.getItem('study_theme') || 'modern';
+        // === INIT ===
+        const st = localStorage.getItem(getLocalKey('study_theme')) || 'modern';
         document.documentElement.setAttribute('data-theme', st);
         document.getElementById('theme-change').value = st;
         renderTasks(); renderDeadlines(); renderStats(); updateDisplay();
